@@ -8,12 +8,14 @@ type Task = {
 function App() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [inputValue, setInputValue] = useState('')
+  const MAX_TASK_LENGTH = 100;
 
   function addTask() {
-    if (inputValue.trim() !== '') {
-      const newTask = { id: crypto.randomUUID(), text: inputValue.trim() }
-      setTasks([...tasks, newTask])
-      setInputValue('')
+    const trimmed = inputValue.trim();
+    if (trimmed !== '' && trimmed.length <= MAX_TASK_LENGTH) {
+      const newTask = { id: crypto.randomUUID(), text: trimmed };
+      setTasks([...tasks, newTask]);
+      setInputValue('');
     }
   }
 
@@ -27,7 +29,10 @@ function App() {
         placeholder="Add task"
         value={inputValue}
         onChange={e => setInputValue(e.target.value)}
-      />
+        onKeyDown={e => {
+        if (e.key === 'Enter') addTask();
+        }}
+/>
       <button onClick={addTask}>Add</button>
 
       <ul>

@@ -145,3 +145,50 @@ it('adds task with special characters', () => {
 
   expect(screen.getByText(specialTask)).toBeInTheDocument()
 })
+
+it('trims input before adding a task', () => {
+  render(<App />);
+  const input = screen.getByPlaceholderText('Add task');
+  const button = screen.getByText('Add');
+
+  fireEvent.change(input, { target: { value: '  trimmed task  ' } });
+  fireEvent.click(button);
+
+  expect(screen.getByText('trimmed task')).toBeInTheDocument();
+});
+
+it('considers tasks with different cases as different', () => {
+  render(<App />);
+  const input = screen.getByPlaceholderText('Add task');
+  const button = screen.getByText('Add');
+
+  fireEvent.change(input, { target: { value: 'Task' } });
+  fireEvent.click(button);
+  fireEvent.change(input, { target: { value: 'task' } });
+  fireEvent.click(button);
+
+  const tasks = screen.getAllByText(/task/i);
+  expect(tasks.length).toBe(2);
+});
+
+it('does not add tasks exceeding max length', () => {
+  render(<App />);
+  const input = screen.getByPlaceholderText('Add task');
+  const button = screen.getByText('Add');
+  const longTask = 'a'.repeat(256); // example limit 255 chars
+
+  fireEvent.change(input, { target: { value: longTask } });
+  fireEvent.click(button);
+
+  expect(screen.queryByText(longTask)).not.toBeInTheDocument();
+});
+
+it('adds task on Enter key press', () => {
+  render(<App />);
+  const input = screen.getByPlaceholderText('Add task');
+
+  fireEvent.change(input, { target: { value: 'Enter Task' } });
+  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+  expect(screen.getByText('Enter Task')).toBeInTheDocument();
+});
